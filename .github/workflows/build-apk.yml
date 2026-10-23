@@ -1,0 +1,49 @@
+name: APK yig'ish
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kodni olish
+        uses: actions/checkout@v4
+
+      - name: JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: APK yig'ish
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --stacktrace
+
+      - name: APK nomini o'zgartirish
+        run: cp app/build/outputs/apk/debug/app-debug.apk GlassMusic.apk
+
+      - name: Artifact sifatida saqlash
+        uses: actions/upload-artifact@v4
+        with:
+          name: GlassMusic-apk
+          path: GlassMusic.apk
+
+      - name: Releases sahifasiga joylash (telefondan yuklab olish uchun)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Glass Music (so'nggi versiya)
+          body: "Telefoningizda shu sahifani oching va GlassMusic.apk ni bosib yuklab oling."
+          prerelease: false
+          make_latest: true
+          files: GlassMusic.apk
